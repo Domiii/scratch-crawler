@@ -1,34 +1,59 @@
-import Crawler from 'simplecrawler';
 import cheerio from 'cheerio';
+import request from 'request-promise-native';
+import contentType from 'content-type';
+import _ from 'lodash';
 
-var crawler = Crawler("https://scratch.mit.edu/users/domiiii/projects/")
-  .on('crawlstart', () => {
-    console.log("Starting...");
-  })
-  .on('queueadd', (queueItem) => {
-    console.warn('Queued: ' + queueItem.path);
-  })
-  .on('fetchcomplete', function(queueItem, responseBuffer){
-    const html = responseBuffer.toString();
-    const $ = cheerio.load(html);
+import URLSet from './URLSet';
 
-    const projLinks = $('.media-grid .project a').get().map((el) => { return $(el).attr('href'); });
-    if (projLinks.length > 0) {
-      projLinks.forEach(link => {
-        crawler.queueURL(link, queueItem, false);
-      });
+// nice little web crawling tool
+// uses request-promise-native + cheerio
+// see: https://www.npmjs.com/package/request-promise
+
+function onErr(err, msg) {
+  console.log();
+  console.error('##########################################');
+  console.error('[Error] ' + (msg || ''));
+  err && console.error(err.stack || err);
+  console.error('##########################################');
+  console.log();
+}
+
+const options = {
+  uri: 'https://scratch.mit.edu/users/domiiii/projects/',
+  transform: function (body, response, resolveWithFullResponse) {
+    const contentInfo = contentType.parse(response);
+
+    try {
+      if (contentInfo.type === 'application/json') {
+        return JSON.parse(body);
+      }
+      else {
+        return cheerio.load(body);
+      }
     }
-    // else if () {
-    //   // TODO: Match path, e.g.: /projects/XXXXXXXX
-    // }
+    catch (err) {
+      onErr(err, `Could not parse website "${response.url}" - Content type: ` + 
+        contentInfo.type);
+      return '';
+    }
+  }
+};
 
-    console.log('fetched: ' + queueItem.path);
-  });
+request(options)
+.then(function ($) {
+  const projLinks = $('.media-grid .project a').get().
+    map((el) => $(el).attr('href'));
 
-crawler.maxDepth = 1;
-crawler.respectRobotsTxt = false;
+  const urls = new URLSet(projLinks);
+  return Promise.all(urls.map());
+})
+.catch(function (err) {
+  // Crawling failed... 
+  onErr(err);
+});
+
+
 
 
 console.log();
 console.log();
-crawler.start();
