@@ -32,7 +32,12 @@ export default class URLSet {
     return _.map(this.urls, fn);
   }
 
+  getUnvisited() {
+    return _.filter(this.urls, (status, url) => !status.nVisited);
+  }
+
   mapUnvisited(fn) {
-    return this.map((status,url) => if (!status.nVisited) fn(status, url));
+    const unvisited = this.getUnvisited();
+    return _.map(unvisited, (status,url) => fn(status, url));
   }
 }

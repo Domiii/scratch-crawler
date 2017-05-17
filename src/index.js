@@ -5,6 +5,12 @@ import _ from 'lodash';
 
 import URLSet from './URLSet';
 
+import {
+  extractScratchURLsFromProjectPage,
+  buildPopularProjectsURL
+}
+from './crawlTools';
+
 // nice little web crawling tool
 // uses request-promise-native + cheerio
 // see: https://www.npmjs.com/package/request-promise
@@ -19,7 +25,7 @@ function onErr(err, msg) {
 }
 
 const options = {
-  uri: 'https://scratch.mit.edu/users/domiiii/projects/',
+  uri: ,
   transform: function (body, response, resolveWithFullResponse) {
     const contentInfo = contentType.parse(response);
 
@@ -41,11 +47,10 @@ const options = {
 
 request(options)
 .then(function ($) {
-  const projLinks = $('.media-grid .project a').get().
-    map((el) => $(el).attr('href'));
+  
+})
+.then(function() {
 
-  const urls = new URLSet(projLinks);
-  return Promise.all(urls.map());
 })
 .catch(function (err) {
   // Crawling failed... 
