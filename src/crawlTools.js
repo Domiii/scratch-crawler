@@ -22,33 +22,3 @@ export function extractScratchURLsFromProjectPage($) {
   const urls = new URLSet(projLinks);
   return urls;
 }
-
-/*
-project data:
-
-const proj = {
-  id,
-  title,
-  description,
-  instructions,
-  image,
-  author: {
-    id,
-    username
-  },
-  history: {
-    created,
-    modified,
-    shared
-  },
-  stats: {
-    views,
-    loves,
-    favorites,
-    comments (seems always to be 0)
-  },
-  remix: {
-    root (seems always to be null)
-  }
-}
-*/
