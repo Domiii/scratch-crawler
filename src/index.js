@@ -7,10 +7,10 @@ import {
 }
 from './scratchCrawlTools';
 
-const userName = 'domiiii';
+const userName = 'griffpatch';
 
 console.log("Getting user projects...");
 
-getAllUserProjects(userName).then(function(projUrlSet) {
-  console.log(`user ${userName} has ${projUrlSet.urlList.length} projects!`);
+getAllUserProjects(userName, 2).then(function(projUrlSet) {
+  console.log(`user ${userName} has ${projUrlSet.urlList().length} projects!`);
 })

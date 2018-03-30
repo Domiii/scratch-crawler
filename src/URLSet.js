@@ -1,21 +1,35 @@
 import _ from 'lodash';
+import isArrayLike from 'lodash/isArrayLike';
 
 export default class URLSet {
   constructor(initialUrls) {
     this.urls = {};
 
     if (initialUrls) {
-      initialUrls.forEach(this.addUrl);
+      this.addUrls(initialUrls);
     }
   }
 
 
-  get urlList() {
+  urlList = () => {
     return Object.keys(this.urls);
   }
 
   addUrl = (url) => {
     this.urls[url] = { nVisited: 0 };
+  }
+
+  addUrls = (urlArr) => {
+    urlArr.forEach(this.addUrl);
+  }
+
+  addSet = (set) => {
+    if (isArrayLike(set)) {
+      set.forEach(this.addSet);
+    }
+    else {
+      this.addUrls(set.urlList());
+    }
   }
 
   getStatus(url) {
@@ -46,10 +60,16 @@ export default class URLSet {
   }
 
   toString() {
-    return this.urlList.join('\n');
+    return this.urlList().join('\n');
   }
 
   get [Symbol.toStringTag]() {
-    return this.urlList.join('\n');
+    return this.urlList().join('\n');
   }
+}
+
+URLSet.union = function(...sets) {
+  const set = new URLSet();
+  set.addSet(sets);
+  return set;
 }

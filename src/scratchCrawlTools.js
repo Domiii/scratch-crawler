@@ -24,8 +24,8 @@ export function buildPopularProjectsURL(from = 0, limit = 20, q = '*') {
 /**
  * The url that contains all projects of a user
  */
-export function buildUserProjectsUrl(username) {
-  return `https://scratch.mit.edu/users/${username}/projects/`;
+export function buildUserProjectsUrl(userName, page = 1) {
+  return `https://scratch.mit.edu/users/${userName}/projects/?page=${page}`;
 }
 
 export function buildProjectUrl(projectId) {
@@ -40,13 +40,17 @@ export function extractScratchURLsFromProjectPage($) {
 }
 
 
-export function getAllUserProjects(userName) {
-  const url1 = buildUserProjectsUrl(userName);
+export function getAllUserProjects(userName, pages = 1) {
+  const promises = [];
   const crawl1 = partialRight(crawlUrl, extractScratchURLsFromProjectPage);
+  for (let p = 1; p <= pages; ++p) {
+    const url = buildUserProjectsUrl(userName, p);
 
-  return crawl1(url1).then(function(urls) {
-    return urls;
-  });
+    promises.push(crawl1(url).then(function(urls) {
+      // TODO: next: crawl each project individually
+      return urls;
+    }));
+  }
 
-  // TODO: next: crawl each project individually
+  return Promise.all(promises).then(URLSet.union);
 }
