@@ -1,24 +1,50 @@
+import cheerio from 'cheerio';
+import request from 'request-promise-native';
+import contentType from 'content-type';
+import _ from 'lodash';
+import partialRight from 'lodash/partialRight';
 
-// possibilities for q: 'animations', 'games', 'art' etc...
-export function buildPopularProjectsURL(from = 0, limit = 20, q = '*') {
-  if (limit > 20) {
-    console.warn('limit (> 20) is probably too high (the query will probably fail): ' + limit);
-  }
-  return `https://api.scratch.mit.edu/search/projects?limit=${limit}&offset=${from}&language=en&mode=popular&q=${q}`;
+function onErr(err, msg) {
+  console.log();
+  console.error('##########################################');
+  console.error('[Error] ' + (msg || ''));
+  err && console.error(err.stack || err);
+  console.error('##########################################');
+  console.log();
 }
 
+/**
+ * 
+ * nice little web crawling tool
+ * uses request-promise-native + cheerio
+ * @see https://www.npmjs.com/package/request-promise
+ */
+export function crawlUrl(url, crawlCb) {
+  const options = {
+    uri: url,
+    transform: function (body, response, resolveWithFullResponse) {
+      const contentInfo = contentType.parse(response);
 
-  // const urls = extractScratchURLsFromProjectPage($);
-  // return Promise.all(urls.mapUnvisited(...));
+      try {
+        if (contentInfo.type === 'application/json') {
+          return JSON.parse(body);
+        }
+        else {
+          return cheerio.load(body);
+        }
+      }
+      catch (err) {
+        onErr(err, `Could not parse website "${response.url}" - Content type: ` + 
+          contentInfo.type);
+        return '';
+      }
+    }
+  };
 
-export function buildUserProjectsUrl(username) {
-  return `https://scratch.mit.edu/users/${username}/projects/`;
-}
-
-export function extractScratchURLsFromProjectPage($) {
-  const projLinks = $('.media-grid .project a').get().
-    map((el) => $(el).attr('href'));
-
-  const urls = new URLSet(projLinks);
-  return urls;
+  return request(options)
+  .then(crawlCb)
+  .catch(function (err) {
+    // Crawling failed... 
+    onErr(err);
+  });
 }

@@ -1,4 +1,4 @@
-export default const db = new Sequelize('database', 'username', 'password', {
+const db = new Sequelize('database', 'username', 'password', {
   host: 'localhost',
   dialect: 'mysql'|'sqlite'|'postgres'|'mssql',
 
@@ -16,3 +16,5 @@ export default const db = new Sequelize('database', 'username', 'password', {
   console.log('Connection has been established successfully.');
   return sequelize;
 });
+
+export default db;

@@ -2,16 +2,20 @@ import _ from 'lodash';
 
 export default class URLSet {
   constructor(initialUrls) {
-    this.urls = [];
-
+    this.urls = {};
 
     if (initialUrls) {
-      initialUrls.forEach(url => this.addUrl.bind(this));
+      initialUrls.forEach(this.addUrl);
     }
   }
 
-  addUrl(url) {
-    this.urls[urls] = { nVisited: 0 };
+
+  get urlList() {
+    return Object.keys(this.urls);
+  }
+
+  addUrl = (url) => {
+    this.urls[url] = { nVisited: 0 };
   }
 
   getStatus(url) {
@@ -39,5 +43,13 @@ export default class URLSet {
   mapUnvisited(fn) {
     const unvisited = this.getUnvisited();
     return _.map(unvisited, (status,url) => fn(status, url));
+  }
+
+  toString() {
+    return this.urlList.join('\n');
+  }
+
+  get [Symbol.toStringTag]() {
+    return this.urlList.join('\n');
   }
 }
